@@ -20,7 +20,6 @@ class Moon
     /**
      * 月齢の計算。ユリウス日の月齢は？
      *
-     * @link http://fujikoweb.net
      * @param  float $tm0	ユリウス日
      * @param  float $jisa	時差(単位=時)
      * @return float 	月齢
