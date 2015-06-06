@@ -15,7 +15,7 @@ class Sun extends SunCommon
      */
     function JD2Lambda($jd0)
     {
-        return 0;
+        return -1;
     }
 
     /**
