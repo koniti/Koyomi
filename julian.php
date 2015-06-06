@@ -150,7 +150,7 @@ class Julian
      * Julian day number -> Gregorio date
      *
      * @param  float $jdnum0	ユリウス日
-     * @return array	[int 年, int 月, int 日, 'y'=>年, 'm'=>月, 'd'=>int 日, 'h'=>int 時, 's'=>float 秒]
+     * @return array	[int 年, int 月, int 日, 'y'=>年, 'm'=>月, 'd'=>int 日, 'h'=>int 時, 'min'=>int 分, 's'=>float 秒]
      */
     function JD2G($jdnum0)
     {

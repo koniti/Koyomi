@@ -132,14 +132,25 @@ class Koyomi
         return( (float)$jd0 - $this->jisa );
     }
 
-    // Julian day number -> 日の十干
+
     // この手の計算だと、JDは、0.5 がついてまわるので、修正ユリウス日を使うほうが、やりやすい。
+    /**
+     * Julian day number -> 日の十干
+     *
+     * @param  float $jd	ユリウス日
+     * @return []	['str'=>string 十干文字, 'num'=>int 十干番号]
+    */
     function JDto10kan($jd)
     {
         $mjd = Julian::JD2MJD((float)$jd);
         return( self::MJDto10kan($mjd) );
     }
-    // M Julian day number -> 日の十干
+    /**
+     * Modified Julian day number -> 日の十干
+     *
+     * @param  float $mjd0	修正ユリウス日
+     * @return []	['str'=>string 十干文字, 'num'=>int 十干番号]
+    */
     function MJDto10kan($mjd)
     {
         // MJD を 10で割ったあまりが、以下のように対応
@@ -154,13 +165,24 @@ class Koyomi
         return( array('str'=>$s, 'num'=>$num) );
     }
 
-    // Julian day number -> 日の十二支
+
+    /**
+     * Julian day number -> 日の十二支
+     *
+     * @param  float $jd	ユリウス日
+     * @return []	['str'=>string 十二支文字, 'num'=>int 十二支番号]
+    */
     function JDto12si($jd)
     {
         $mjd = Julian::JD2MJD((float)$jd);
         return( self::MJDto12si($mjd) );
     }
-    // M Julian day number -> 日の十二支
+    /**
+     * Modified Julian day number -> 日の十二支
+     *
+     * @param  float $mjd0	修正ユリウス日
+     * @return []	['str'=>string 十二支文字, 'num'=>int 十二支番号]
+    */
     function MJDto12si($mjd)
     {
         // MJD を 12で割ったあまりが、以下のように対応
@@ -175,9 +197,17 @@ class Koyomi
         return( array('str'=>$s, 'num'=>$num) );
     }
 
+
     //ちなみに、曜日
     //余り: 0  1  2  3  4  5  6
     //曜日: 水 木 金 土 日 月 火
+    //未使用関数
+    /**
+     * Modified Julian day number -> その日の曜日
+     *
+     * @param  float $mjd0	修正ユリウス日
+     * @return string	曜日の文字
+    */
     function MJDtoW($mjd)
     {
         $tbl = array('水', '木', '金', '土', '日', '月', '火');
@@ -185,7 +215,14 @@ class Koyomi
         return( $tbl[$x] );
     }
 
-    // Julian day number -> 年の9,10,12を求める
+
+
+    /**
+     * Julian day number -> 年の9,10,12を求める
+     *
+     * @param  float $jd0	ユリウス日
+     * @return array	[ 'ynum9'=>int 年9星, 'ynum10'=>int 年十干, 'ynum12'=>int 年十二支 ]
+    */
     function JDtoYearStars($jd0)
     {
         $jd = (float)$jd0;
@@ -213,7 +250,13 @@ class Koyomi
         return(array('ynum9'=>$n9,    'ynum10'=>$n10,    'ynum12'=>$n12));
     }
 
-    // Julian day number -> 月の9,10,12を求める
+    //
+    /**
+     * Julian day number -> 月の9,10,12を求める
+     *
+     * @param  float $jd0	ユリウス日
+     * @return array	[ 'ynum9'=>int 年9星, 'ynum10'=>int 年十干, 'ynum12'=>int 年十二支,  'mnum9'=>int 月9星, 'mnum10'=>int 月十干, 'mnum12'=>int 月十二支,  'long'=>float 太陽黄経°]
+    */
     function JDtoMonthStars($jd0)
     {
         $jd = (float)$jd0;
@@ -263,7 +306,12 @@ class Koyomi
         return(array('mnum9'=>$mnum9, 'mnum10'=>$mnum10, 'mnum12'=>$mnum12, 'long'=>$long, 'ynum9'=>$n9, 'ynum10'=>$n10, 'ynum12'=>$n12));
     }
 
-    // Julian day number -> 日の9,10,12を求める
+    /**
+     * Julian day number -> 日の9,10,12を求める
+     *
+     * @param  float $jd0	ユリウス日
+     * @return array	[ 'dnum9'=>int 日9星, 'dnum10'=>int 日十干, 'dnum12'=>int 日十二支 ]
+    */
     function JDtoDayStars($jd0)
     {
         $jd = (float)$jd0;
@@ -336,7 +384,13 @@ class Koyomi
         return(array('dnum9'=>$dnum9, 'dnum10'=>$dnum10, 'dnum12'=>$dnum12));
     }
 
-    // Julian day number -> 年月日の9,10,12を求める
+    // 
+    /**
+     * Julian day number -> 年月日の9,10,12を求める
+     *
+     * @param  float $jd0	ユリウス日
+     * @return array	[ 'ynum9'=>int 年9星, 'ynum10'=>int 年十干, 'ynum12'=>int 年十二支,  'mnum9'=>int 月9星, 'mnum10'=>int 月十干, 'mnum12'=>int 月十二支,  'dnum9'=>int 日9星, 'dnum10'=>int 日十干, 'dnum12'=>int 日十二支,  'long'=>float 太陽黄経°]
+    */
     function JDto91012($jd0)
     {
         $jd = (float)$jd0;
@@ -372,25 +426,37 @@ class Koyomi
                       'long'=>$long
                       ) );
     }
-    // M Julian day number -> 9,10,12を求める
+
+    /**
+     * Modified Julian day number -> 年月日の9,10,12を求める
+     *
+     * @param  float $jd0	ユリウス日
+     * @return array	[ 'ynum9'=>int 年9星, 'ynum10'=>int 年十干, 'ynum12'=>int 年十二支,  'mnum9'=>int 月9星, 'mnum10'=>int 月十干, 'mnum12'=>int 月十二支,  'dnum9'=>int 日9星, 'dnum10'=>int 日十干, 'dnum12'=>int 日十二支,  'long'=>float 太陽黄経°]
+    */
     function MJDto91012($mjd)
     {
         $jd = self::MJD2JD($mjd);
         return(self::JDto91012($jd));
     }
 
-    // JD から 月(24節気で切り替えの月)を調べる
+
+
+    /**
+     * JD から 月(24節気で切り替えの月)を調べる
+     *
+     * @param  float $jd0	ユリウス日
+     * @return array	[int 月, 'm'=>int 月, 'long'=>float 太陽黄経°]
+    */
     function JDto24Mon($jd0)
     {
         $jd = (float)$jd0;
-
         // JD から、太陽黄経度λsun度を得る
         $jdg = self::toUTCJD($jd);
         $l = Sun::JD2Lambda($jdg);
 
 
         //-- 天文計算する場合、ここから
-        //       天文計算しないので、毎月1日を月の切り替えとする
+        //       天文計算しない場合、毎月1日を月の切り替えとする
         if ($l < 0) {
             $a = Julian::JD2G($jd);
             $m = $a['m'];
@@ -399,7 +465,6 @@ class Koyomi
         //-- ここまでカット
 
 
-        //天文計算する場合はこちら
         while($l < 0.0)   { $l = $l + 360.0; }
         while($l > 360.0) { $l = $l - 360.0; }
         // array('', 285, 315, 345,  15,  45,  75, 105, 135, 165, 195, 225, 255);
@@ -414,7 +479,9 @@ class Koyomi
         return( array($m, $l,'m'=>$m,'long'=>$l) );
     }
 
+
     // 引数月の切り替わり(24節気)、太陽の角°返す
+    // 未使用関数
     function m24deg($month0)
     {
         $m = (int)$month0;
@@ -427,6 +494,31 @@ class Koyomi
     }
 
 
+    //================================================
+    // その年の 夏至 Summer Solstice
+    // 未使用関数
+    function summerSol($y0)
+    {
+        $y = (int)$y0;
+        $s = Julian::G2JD($y, 6, 15, 0.0); // gives UTC. no problems.
+        $e = $s + 15;
+        $ans = Sun::searchDegDay(90, $s, $e) + $this->jisa/24.0; // return local time.
+        return $ans;
+    }
+    // その年の 冬至 Winter Solstice
+    // 未使用関数
+    function winterSol($y0)
+    {
+        $y = (int)$y0;
+        $s = Julian::G2JD($y, 12, 15, 0.0);
+        $e = $s + 15;
+        $ans = Sun::searchDegDay(270, $s, $e) + $this->jisa/24.0;
+        return $ans;
+    }
+
+
+
+    //================================================
     /*
      9星切り替え日 list。特異点(三碧、七赤)のみ
      magic number = 3980。MJDの初期値=220
@@ -434,6 +526,7 @@ class Koyomi
      0==(MJD+3890)%4200 && 0==(MJD+3890)%8400 のとき、七赤
      0==(MJD+3890)%4200 && 4200==(MJD+3890)%8400 のとき、三碧
     */
+    // 未使用関数
     function listTurn9sp()
     {
         $syoki = 220;
@@ -470,6 +563,7 @@ class Koyomi
       +切り替え日
       | +180日
      */
+    // 未使用関数
     function listTurn9()
     {
         $syoki = 220 + 4200 * 5; // MJD220=最初の特異点おきる日
@@ -503,7 +597,22 @@ class Koyomi
         }
     }
 
-    // year's 土用
+
+    //================================================
+    /**
+     * 指定された年の、土用の日時を返す
+     *
+     * @param  int $y0	西暦年
+     * @param  float $d0        西暦日
+     * @param  float $h0        西暦時
+     * @param  float $min0      西暦分
+     * @param  float $s0        西暦秒
+     * @return [][]  	[]['y'=>int 年,'m'=>int 月,'d'=>int 日, 'h'=>int 時, 'min'=>int 分, 's'=>float 秒]
+     *               	0: 春の土用
+     *               	1: 夏の土用
+     *               	2: 秋の土用
+     *               	3: 冬の土用
+    */
     function yDoyou($y0)
     {
         $y = (int)$y0;
@@ -524,9 +633,15 @@ class Koyomi
         return $ans;
     }
 
-    // 十干,十二支 => 60干支の番号を得る
-    // return: 1-60
-    // error: -1
+
+    //================================================
+    /**
+     * 十干,十二支 => 60干支の番号を得る
+     *
+     * @param  int $on10	十干(1-10)
+     * @param  int $on12	十二支(1-12)
+     * @return int 	1-60の番号。エラーのとき -1
+    */
     function n1012to60num($on10, $on12)
     {
         $n10 = intval($on10); $n12 = intval($on12);
@@ -565,7 +680,12 @@ class Koyomi
         return $c;
     }
 
-    // 60干支番号 -> 納音名を返す
+    /**
+     * 60干支番号 -> 納音名を返す
+     *
+     * @param  int $num	60干支番号(1-60)
+     * @return string 	納音名。エラーのとき ''
+    */
     function n60toNatt($num)
     {
         $n = intval($num);
@@ -576,11 +696,19 @@ class Koyomi
         return self::$natt[$a];
     }
 
-    // 十干,十二支 => 納音名
+    /**
+     * 十干,十二支 => 納音名
+     *
+     * @param  int $on10	十干(1-10)
+     * @param  int $on12	十二支(1-12)
+     * @return string 	納音名。エラーのとき ''
+    */
     function n1012toNatt($n10, $n12)
     {
         return  self::n60toNatt( self::n1012to60num($n10, $n12) );
     }
+
+
 
     //================================================
     // getter
@@ -639,86 +767,18 @@ class Koyomi
       冬至 270 :12/21
         */
     // -----------------------------------------------------------------
-    /*
-    指定された年の、24節気の半分のリスト(中節)。ただし、前年の冬至含む
-    JD (Local time)
-     0: 西暦、前年12月
-     1:  1月の中節のJD
-     2:  2月......
 
-     13: 次の年1月
+    /**
+     * 指定された日の、旧暦の日付、六曜を返す
+     *
+     * @param  int $y0  西暦年
+     * @param  int $m0  西暦月
+     * @param  float $d0        西暦日
+     * @param  float $h0        西暦時
+     * @param  float $min0      西暦分
+     * @param  float $s0        西暦秒
+     * @return array	['qy'=>int 旧暦年,'qm'=>int 旧暦月,'qd'=>int 旧暦日, 'dnum6'=>旧暦日の六曜]
     */
-    // -----------------------------------------------------------------
-    protected function listChuSetu($year0)
-    {
-        $y = (int)$year0;
-        $a = array();
-
-        //前年の冬至(JD)
-        $j1 = Julian::G2JD($y-1, 12, 10, 0, 0)  - $this->jisa;
-        $j2 = $j1 + 25;
-        $a[0]['jd'] = Sun::searchDegDay(270, $j1, $j2) + $this->jisa;
-        $a[0]['deg'] = 270;
-
-        //今年の 300,330,0,30,....のリスト
-        for ($i=0; $i<12; $i++) {
-            $monx = $i + 1;
-            $deg = fn_nm(300 + 30 * $i);
-            $j1 = Julian::G2JD($y, $monx, 10, 0, 0)  - $this->jisa;
-            $j2 = $j1 + 25;
-            $a[$i+1]['jd'] = Sun::searchDegDay($deg, $j1, $j2) + $this->jisa;
-            $a[$i+1]['deg'] = $deg;
-        }
-        // $a[13] 次の年1月
-        $j1 = Julian::G2JD($y+1, 1, 10, 0, 0)  - $this->jisa;
-        $j2 = $j1 + 25;
-        $a[$i+1]['jd'] = Sun::searchDegDay(300, $j1, $j2) + $this->jisa;
-        $a[$i+1]['deg'] = 300;
-        return($a);
-    }
-
-    //
-    protected function listSaku($year0)
-    {
-        $y = (int)$year0;
-        $a = self::listChuSetu($y);
-        $sd = array();
-        foreach ($a as $a1) {
-            $v = $a1['jd'];
-            $p = Moon::findNewMoon($v - 8, $this->jisa);
-            $n = Moon::findNewMoon($v + 5, $this->jisa);
-
-            if ($p > 0) {
-                $d1 = Julian::JD2G($p);
-                $sd[] = Julian::G2JD($d1['y'], $d1['m'], $d1['d'], 0, 0, 0);
-                //$sd[] = sprintf("%04d-%02d-%02d", $d1['y'], $d1['m'], $d1['d']);
-                //$sd[] = sprintf("%04d-%02d-%02d %02d:%02d:%02d", $d1['y'], $d1['m'], $d1['d'], $d1['h'], $d1['min'], $d1['s']);
-            }
-            if ($n > 0) {
-                $d1 = Julian::JD2G($n);
-                $sd[] = Julian::G2JD($d1['y'], $d1['m'], $d1['d'], 0, 0, 0);
-                //$sd[] = sprintf("%04d-%02d-%02d", $d1['y'], $d1['m'], $d1['d']);
-                //$sd[] = sprintf("%04d-%02d-%02d %02d:%02d:%02d", $d1['y'], $d1['m'], $d1['d'], $d1['h'], $d1['min'], $d1['s']);
-            }
-        }
-        $sd = array_unique($sd);
-        sort($sd);
-        //        return($sd);
-
-        // 最初の朔日が、確実に冬至を含むように
-        $n0 = $sd[0];
-        $n1 = $sd[1];
-        $c = $a[0]['jd'];
-        $cg = Julian::JD2G($c);
-        $cx = Julian::G2JD($cg['y'], $cg['m'], $cg['d'], 0, 0, 0);
-        if ($n1 <= $cx) {
-            array_shift($sd);
-        }
-
-        return($sd);
-    }
-
-    //旧暦の日付、六曜を返す
     function G2Q($y0, $m0, $d0, $h0=0, $min0=0, $s0=0)
     {
         $y = (int)$y0;
@@ -754,14 +814,118 @@ class Koyomi
         return( array('qy'=>$qy,'qm'=>$qm,'qd'=>$qd,'dnum6'=>$yo6) );
     }
 
-    //
+
+    /**
+     * 指定された日の、旧暦の日付、六曜を返す
+     *
+     * @param  float $jd0        ユリウス日
+     * @return array	['qy'=>int 旧暦年,'qm'=>int 旧暦月,'qd'=>int 旧暦日, 'dnum6'=>旧暦日の六曜]
+    */
     function JD2Q($jd0)
     {
         $gd = Julian::JD2G((float)$jd0);
         return(self::G2Q($gd['y'],$gd['m'],$gd['d']));
     }
 
-    //
+
+
+    /**
+     * 指定された年の、24節気の半分のリスト(中節)。ただし、前年の冬至含む
+     *
+     * @access protected
+     * @param  int  $year0	西暦
+     * @return array	[]['jd'=>ユリウス日(Local time), 'deg'=>太陽の黄経°]
+     *              	 0: 西暦、前年12月の中節のJD
+     *              	 1:  1月の中節のJD
+     *              	 2:  2月......
+     *               	         :
+     *              	13: 次の年1月
+    */
+    protected function listChuSetu($year0)
+    {
+        $y = (int)$year0;
+        $a = array();
+
+        //前年の冬至(JD)
+        $j1 = Julian::G2JD($y-1, 12, 10, 0, 0)  - $this->jisa;
+        $j2 = $j1 + 25;
+        $a[0]['jd'] = Sun::searchDegDay(270, $j1, $j2) + $this->jisa;
+        $a[0]['deg'] = 270;
+
+        //今年の 300,330,0,30,....のリスト
+        for ($i=0; $i<12; $i++) {
+            $monx = $i + 1;
+            $deg = fn_nm(300 + 30 * $i);
+            $j1 = Julian::G2JD($y, $monx, 10, 0, 0)  - $this->jisa;
+            $j2 = $j1 + 25;
+            $a[$i+1]['jd'] = Sun::searchDegDay($deg, $j1, $j2) + $this->jisa;
+            $a[$i+1]['deg'] = $deg;
+        }
+        // $a[13] 次の年1月
+        $j1 = Julian::G2JD($y+1, 1, 10, 0, 0)  - $this->jisa;
+        $j2 = $j1 + 25;
+        $a[$i+1]['jd'] = Sun::searchDegDay(300, $j1, $j2) + $this->jisa;
+        $a[$i+1]['deg'] = 300;
+        return($a);
+    }
+
+
+    /**
+     * 指定された年の、中節付近の新月のリスト。ただし、前年の冬至含む
+     *
+     * @access protected
+     * @param  int  $year0	西暦
+     * @return float[]	[ユリウス日(Local time)]
+     *              	 0: 西暦、前年12月の中節付近の新月のJD
+     *               	         :
+     *              	 n: 次の年1月
+    */
+    protected function listSaku($year0)
+    {
+        $y = (int)$year0;
+        $a = self::listChuSetu($y);
+        $sd = array();
+        foreach ($a as $a1) {
+            $v = $a1['jd'];
+            $p = Moon::findNewMoon($v - 8, $this->jisa);
+            $n = Moon::findNewMoon($v + 5, $this->jisa);
+
+            if ($p > 0) {
+                $d1 = Julian::JD2G($p);
+                $sd[] = Julian::G2JD($d1['y'], $d1['m'], $d1['d'], 0, 0, 0);
+            }
+            if ($n > 0) {
+                $d1 = Julian::JD2G($n);
+                $sd[] = Julian::G2JD($d1['y'], $d1['m'], $d1['d'], 0, 0, 0);
+            }
+        }
+        $sd = array_unique($sd);
+        sort($sd);
+
+        // 最初の朔日が、確実に冬至を含むように
+        $n0 = $sd[0];
+        $n1 = $sd[1];
+        $c = $a[0]['jd'];
+        $cg = Julian::JD2G($c);
+        $cx = Julian::G2JD($cg['y'], $cg['m'], $cg['d'], 0, 0, 0);
+        if ($n1 <= $cx) {
+            array_shift($sd);
+        }
+
+        return($sd);
+    }
+
+
+    /**
+     * 指定された年の、旧暦のリスト。ただし、前年の冬至含む
+     *
+     * @access protected
+     * @param  int  $year0	西暦
+     * @return [][] 	[][ 'y'=>int 年, 'leap'=>int 閏月なら1, 'm'=>int 月, 'sakujd'=>float 朔日JD, 'sakug'=>string 朔日を"%04d-%02d-%02d"表記, 'chujd'=>float 中気のJD、なければNULL, 'chudeg'=>float 中気の黄経、なければNULL ]
+     *              	 0: 西暦、前年12月の冬至付近の旧暦情報
+     *               	         :
+     *              	 n: 次の年1月
+    */
     protected function listQ($year0)
     {
         $y = (int)$year0;
@@ -770,20 +934,6 @@ class Koyomi
         $chucnt = count($chu);
         $sd = self::listSaku($y);
         $sdcnt = count($sd);
-        /*
-          echo "中節\n";
-          foreach ($chu as $v) {
-          $g = Julian::JD2G($v['jd']);
-          $s = sprintf("%04d-%02d-%02d %02d:%02d:%02d", $g['y'], $g['m'], $g['d'], $g['h'], $g['min'], $g['s']);
-          echo "$s\n";
-          }
-          echo "朔日\n";
-          foreach ($sd as $v) {
-          $g = Julian::JD2G($v);
-          $s = sprintf("%04d-%02d-%02d %02d:%02d:%02d", $g['y'], $g['m'], $g['d'], $g['h'], $g['min'], $g['s']);
-          echo "$s\n";
-          }
-        */
 
         $qm1 = array();
         $gd = Julian::JD2G($sd[0]);
@@ -954,7 +1104,7 @@ class Koyomi
         }
 
         return($qm1);
-    } //end of function
+    } //end of function listQ
 
 
 } // end of class
