@@ -383,6 +383,13 @@ class Koyomi
     function JDto24Mon($jd0)
     {
         $jd = (float)$jd0;
+
+        // 天文計算しないので、毎月1日を月の切り替えとする
+        $a = Julian::JD2G($jd);
+        $m = $a['m'];
+        return( array($m, 0.0, 'm'=>$m, 'long'=>0.0) );
+
+        //天文計算する場合はこちら
         // JD から、太陽黄経度λsun度を得る
         $jdg = self::toUTCJD($jd);
         $l = Sun::JD2Lambda($jdg);
