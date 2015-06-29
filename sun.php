@@ -7,22 +7,11 @@ require_once('sun0.php');
 class Sun extends SunCommon
 {
     /**
-     * 太陽の黄経 λsun 計算
-     * 計算部分作ること
-     *
-     * @param  float $jd0	ユリウス日
-     * @return float 	λsun°(0〜360)
-     */
-    function JD2Lambda($jd0)
-    {
-        return -1;
-    }
-
-    /**
      * $deg0 になる時の、JD(UTC) を返す
      * $low0 - $high0 日(JD UTC) の間を調べる。
      * 時差は、呼び出す前に考慮すること。返り値に時差を足すこと。
-     * ここは、数学的にもっと良い物に変えたい。今は力技。
+     * ここは数学的にもっと良い物に変えたい。今は力技。
+     * あるいは外部プログラムを呼び出してやってもよい。その場合は中身をごっそり変える
      *
      * @param  float $deg0	λsun°(0〜360)
      * @param  float $low0	ユリウス日(解を探す期間)
