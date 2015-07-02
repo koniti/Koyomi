@@ -272,15 +272,15 @@ class Koyomi
     {
         $jd = (float)$jd0;
         // ***年***
-        if (!HAVE_ASTROCALC) {
+if (!HAVE_ASTROCALC):
         /* 天文計算しない場合:
             01-01 〜 02-03 一杯までは前年扱い。その分、日数(固定値34日)を引いて計算すると楽。
         */
         $x = $jd - 34;
         $ar = Julian::JD2G($x);
         $y = $ar['y'];
-        }
-        else { //天文計算あり
+
+else: //天文計算あり
         /* 本当は2/4も24節気計算しないといけない。2/5(or2/3)が切り替えの時がある。
          * 2/5切り替えの年: 1916,1919,1920,1923,1924,1927,1928,1931,1932,1935,1936,1939,1940,1943,1944,1947,1948,1951,1952,1956,1960,1964,1968,1972,1976,1980,1984,
          * 2/3切り替えの年: 2021,2025,2029,2033,2037,2041,
@@ -296,8 +296,7 @@ class Koyomi
             self::s24jdpool_set("$y", "$deg", $t);
         }
         if ($jd < $t) { $y = $y -1; }
-        }
-
+endif;
         // $a9=array('二', '一', '九', '八', '七', '六', '五', '四', '三');
         $b9  = array( 2,    1,    9,    8,    7,    6,    5,    4,    3);
         //$a10=array('庚', '辛', '壬', '癸', '甲', '乙', '丙', '丁', '戊', '己');
@@ -326,6 +325,13 @@ class Koyomi
     function JDtoMonthStars($jd0)
     {
         $jd = (float)$jd0;
+
+if (!HAVE_ASTROCALC): // 天文計算しない場合: 毎月1日を月の切り替えとする
+            $a = Julian::JD2G($jd);
+            $m = $a['m'];
+            return( array($m, 0.0, 'm'=>$m, 'long'=>0.0) );
+endif;
+
         $a = self::JDtoYearStars($jd);
 
         $n9 = $a['ynum9'];
@@ -505,16 +511,6 @@ class Koyomi
     {
         $jd = (float)$jd0;
 
-
-        if (!HAVE_ASTROCALC) {
-        // 天文計算しない場合:
-        //       天文計算しない場合、毎月1日を月の切り替えとする
-            $a = Julian::JD2G($jd);
-            $m = $a['m'];
-            return( array($m, 0.0, 'm'=>$m, 'long'=>0.0) );
-        }
-
-
         $g = Julian::JD2G($jd);
         $y = $g['y'];
         $m = $g['m'];
@@ -580,10 +576,10 @@ class Koyomi
     //================================================
     /*
      9星切り替え日 list。特異点(三碧、七赤)のみ
-     magic number = 3980。MJDの初期値=220
-     0==(MJD+3890)%4200 のとき、{三碧,七赤}の甲午
-     0==(MJD+3890)%4200 && 0==(MJD+3890)%8400 のとき、七赤
-     0==(MJD+3890)%4200 && 4200==(MJD+3890)%8400 のとき、三碧
+     magic number = 3980。MJDの初期値=220(1859-06-25 三碧)
+     0==(MJD+3980)%4200 のとき、{三碧,七赤}の甲午
+     0==(MJD+3980)%4200 && 0==(MJD+3980)%8400 のとき、七赤
+     0==(MJD+3980)%4200 && 4200==(MJD+3980)%8400 のとき、三碧
     */
     // 未使用関数
     function listTurn9sp()
@@ -625,12 +621,13 @@ class Koyomi
     // 未使用関数
     function listTurn9()
     {
-        $syoki = 220 + 4200 * 5; // MJD220=最初の特異点おきる日
+        $syoki = 220 + 4200 * 5; // MJD220=最初の特異点おきる日 1859-06-25 三碧
         $mjd = $syoki;
         $plus = 180;
+        // 切替日を50個出力
         for ($i=0; $i<50; $i++)
         {
-                $dnum9 = 0;
+            $dnum9 = 0;
             $jd = Julian::MJD2JD($mjd);
             $a = Julian::JD2G($jd);
             $kan=self::MJDto10kan($mjd);
@@ -647,7 +644,7 @@ class Koyomi
                 elseif ( 5 <= $a['m'] && $a['m'] <=  8) { $dnum9 = 9; }
             }
 
-            echo "mjd=$mjd jd=$jd {$a['y']} {$a['m']} {$a['d']} 9star=$dnum9 10kan={$kan['num']} 12si={$si['num']}\n";
+            echo "mjd=$mjd jd=$jd {$a['y']} {$a['m']} {$a['d']} 9star={$dnum9} 10kan={$kan['num']} 12si={$si['num']}<br>\n";
 
             if (3990 == $x || 0 == $x) { $plus = 210; }
             else { $plus = 180; }
@@ -656,6 +653,77 @@ class Koyomi
         }
     }
 
+    /**
+     * 指定時に近い九星切替日を得る
+     *
+     * @param  float $jd	ユリウス日(Local time でよい)
+     * @return array	[float 前の切り替えJD, int 前の切り替え九星,  float 次の切り替えJD, int 次の切り替え九星]
+    */
+    // 未使用関数
+    function getNearTurn9($jd)
+    {
+        $jd = floatVal( $jd );
+        $mjd = intVal( Julian::JD2MJD($jd) );
+
+        $p = $mjd -220; // magic number  3980 + 220 = 4200  MJD220=1859-06-25 三碧
+        $x = $p % 4200;
+
+        //特異点。1日ずらそう。
+/*      if (0 == $x) {
+            $p = $p + 1;
+            $x = $p % 4200;
+        }
+*/
+            //前後の切替日をさがせ!
+            // 前の特異点MJD
+            $prev_sp = intval($p / 4200) * 4200 +220;
+            // 次の特異点MJD
+            $next_sp = $prev_sp + 4200;
+
+            //直前、直後の特異点の星
+            if (0 == (($prev_sp -220) % 8400)) { $prev_sp_num9 = 3; } else { $prev_sp_num9 = 7; }
+            if (0 == (($next_sp -220) % 8400)) { $next_sp_num9 = 3; } else { $next_sp_num9 = 7; }
+
+            //現時点は、どの区間か？+180日されるところにいるのか？+210か？
+            // 直前の切り替え日をさがせ
+            if (3990 <= $x) {
+                $prev_change = $next_sp - 210;
+                if (3 == $next_sp_num9) { //陽遁
+                    $prev_change_num9 = 1; $p_m = 1;
+                }
+                else { //陰遁
+                    $prev_change_num9 = 9; $p_m =-1;
+                }
+                $next_change = $next_sp;
+                $next_change_num9 = $next_sp_num9;
+            }
+            elseif ($x < 210) {
+                $prev_change = $prev_sp;
+                $prev_change_num9 = $prev_sp_num9;
+                if (3 == $prev_sp_num9) { $p_m =-1; } else { $p_m = 1; }
+
+                $next_change = $prev_sp + 210;
+                $next_change_num9  =  ( $p_m > 0 )  ?  9  :  1;
+            }
+            else {
+                // 210 <= $x < 3990 つまり、+180 の区間に居る
+                $y = $x - 30; //最初の区間 210日。180にする
+                $prev_change = $prev_sp + 30 + intval($y / 180) * 180;
+
+                // 直前の切替日は何月？ -> 9星がわかる
+                $a = Julian::MJD2G( $prev_change );
+                if (1 == $a['m']) { $prev_change_num9 = 1; $p_m = 1; }
+                elseif (10 <= $a['m'] && $a['m'] <= 12) { $prev_change_num9 = 1; $p_m = 1; }
+                elseif ( 5 <= $a['m'] && $a['m'] <=  8) { $prev_change_num9 = 9; $p_m =-1; }
+
+                $next_change = $prev_change + 180;
+                $next_change_num9  =  ( $p_m > 0 )  ?  9  :  1;
+            }
+        $jdprev = Julian::MJD2JD($prev_change);
+        $jdnext = Julian::MJD2JD($next_change);
+        return(array ( $jdprev , $prev_change_num9,
+                       $jdnext , $next_change_num9 )   );
+    }
 
     //================================================
     /**
