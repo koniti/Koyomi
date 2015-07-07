@@ -1,4 +1,4 @@
-// coding: utf-8
+// -*- coding: utf-8 -*-
 
 指定されたユリウス日の、九星、十干、十二支、納音、(旧暦日、六曜)得るプログラム  
 使い方は、  
@@ -65,3 +65,6 @@ define('HAVE_ASTROCALC', true);
 　Koyomi::listQ()  
 は不要です。削除して結構です。
 
+
+License: GPL2
+https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
