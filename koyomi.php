@@ -272,8 +272,8 @@ class Koyomi
     {
         $jd = (float)$jd0;
         // ***年***
-if (!HAVE_ASTROCALC):
-        /* 天文計算しない場合:
+if (!HAVE_ASTRO_SUN):
+        /* 天文計算しない場合(太陽):
             01-01 〜 02-03 一杯までは前年扱い。その分、日数(固定値34日)を引いて計算すると楽。
         */
         $x = $jd - 34;
@@ -326,7 +326,7 @@ endif;
     {
         $jd = (float)$jd0;
 
-if (!HAVE_ASTROCALC): // 天文計算しない場合: 毎月1日を月の切り替えとする
+if (!HAVE_ASTRO_SUN): // 太陽の天文計算しない場合: 毎月1日を月の切り替えとする
             $a = Julian::JD2G($jd);
             $m = $a['m'];
             return( array($m, 0.0, 'm'=>$m, 'long'=>0.0) );
@@ -1012,6 +1012,10 @@ endif;
     */
     function G2Q($y0, $m0, $d0, $h0=0, $min0=0, $s0=0)
     {
+if (! HAVE_ASTRO_MOON ):
+        // 天文計算(月)しない場合
+        return NULL;
+endif;
         $y = (int)$y0;
         $m = (int)$m0;
         $d = (float)$d0;
@@ -1042,7 +1046,6 @@ endif;
             友引 先負 仏滅 大安 赤口 先勝
         */
         $yo6 = ($qm + $qd + 4) % 6 +1;
-
         return( array('qy'=>$qy,'qm'=>$qm,'qd'=>$qd,'dnum6'=>$yo6) );
     }
 
@@ -1172,6 +1175,10 @@ endif;
     */
     protected function listQ($year0)
     {
+if (! HAVE_ASTRO_MOON ):
+        // 天文計算(月)しない場合
+        return NULL;
+endif;
         $y = (int)$year0;
 
         $chu = self::listChuSetu($y); //西暦で、前年12月,1月,2月...12月,翌年1月 : 合計14個

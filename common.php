@@ -5,7 +5,11 @@ define("__MYDEFS__", 1);
 define("C_Rads", M_PI / 180.0);
 define("C_Degs", 180.0 / M_PI);
 define('Hantei1', 0.000001);
-define('HAVE_ASTROCALC', false);
+
+define('HAVE_ASTRO_SUN', true);
+//define('HAVE_ASTRO_SUN', false);
+define('HAVE_ASTRO_MOON', true);
+//define('HAVE_ASTRO_MOON', false);
 }
 /* HAVE_ASTROCALC について
  * moon.php、sun.phpで、天文計算ルーチンを組み込んだ場合、「true」にする。

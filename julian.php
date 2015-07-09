@@ -109,23 +109,11 @@ class Julian
             exit(1);
         }
 
-        // start at 00:00:00
-        $d = $d - 0.5 + $h/24 + $min/(24*60) + $sec/(24*60*60);
-
-        //---
-        $a = intval( (14-$m)/12 ); // 1月2月は1。それ以外は0
-        $y = $y0 + 4800 - $a; // we will start counting years from the year -4800.
-        $m = $m0 + 12 * $a - 3; // 10->1月, 11->2月, 0->3月, 1->4月...
-        $jd = $d + floor( (153*$m +2)/5 ) + 365*$y + floor($y / 4) - floor($y/100) + floor($y/400) -32045;
+        $jdInt = gregoriantojd($m, $d, $y); //BOOO!!!
+        $f = $h / 24.0 + $min / (24.0*60.0) + $sec / (24.0*3600.0);
+        $jd = floatVal($jdInt) + $f + 0.5;
 
         return($jd);
-        /*
-          note:
-          CE,BCE counting:  year 1 == 1 CE / year 0 == 1 BCE / year -1 == 2 BCE
-          integer division (153*$m +2)/5 : day counting. calculate the number of days in the previous months
-          y/4 - y/100 + y/400 (all integer divisions) : calculates the number of leap years since the year -4800 (which corresponds to a value of 0 for y)
-          -32045 : ensures that the result will be 0 for January 1, 4713 BCE
-        */
     }
 
     /**
@@ -155,39 +143,30 @@ class Julian
     function JD2G($jdnum0)
     {
         $jdnum = (float)$jdnum0;
-        if ($jdnum < 0) {
-            print "ERROR: Julian::JD2G(jdnum) :  jdnum < 0\n";
+        if ($jdnum <= 0) {
+            print "ERROR: Julian::JD2G(jdnum) :  jdnum <= 0\n";
             exit(1);
         }
 
-        // start at 00:00:00
-        $jdnum = (float)$jdnum0 + 0.5;
+        $jdnum = $jdnum +0.5;
+        $jdInt = intVal($jdnum);
+        $gstr = jdtogregorian($jdInt); // month/day/year.
+        $dd = explode('/', $gstr);  // [m,d,y]
 
-        //---
-        // constant values of the expressions
-        $y = 4716; $v = 3;
-        $j = 1401; $u = 5;
-        $m = 2;    $s = 153;
-        $n = 12;   $w = 2;
-        $r = 4;    $b = 274277;
-        $p = 1461; $c = -38;
+        $f = $jdnum - intVal($jdnum);
 
-        // let's computing.
-        $f = $jdnum + $j + intval(  (intval((4 * $jdnum + $b) / 146097) * 3)  / 4  ) + $c;
-        $e = $r * $f + $v;
-        $g = intval( ($e % $p) / $r );
-        $h = $u * $g + $w;
-        $D = intval( ($h % $s) / $u ) + 1;
-        $M = (intval($h / $s) + $m) % $n + 1;
-        $Y = intval($e / $p) - $y + intval( ($n + $m - $M) / $n);
+        $x = $f * 24.0;
+        $h = intVal($x);
 
-        // hour,min,sec
-        $decimal = $jdnum - fn_cut_decimal($jdnum);
-        $hour = $decimal * 24.0;
-        $min = ($hour - intval($hour)) * 60.0;
-        $sec = ($min - intval($min)) * 60.0;
+        $x = $x - $h;
+        $x = $x * 60.0;
+        $min = intVal($x);
 
-        return array($Y, $M, $D, 'y'=>$Y, 'm'=>$M, 'd'=>$D, 'h'=>intval($hour), 'min'=>intval($min), 's'=>$sec);
+        $x = $x - $min;
+        $x = $x * 60.0;
+        $sec = $x;
+
+        return array($dd['2'],$dd['0'],$dd['1'],$h,$min,$sec);
     }
 
     /**
