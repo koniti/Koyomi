@@ -81,8 +81,9 @@ function doCalc($jisa0, $y0,$m0,$d0, $h0=0, $min0=0, $sec0=0)
 
 if (HAVE_ASTRO_MOON): // 月 天文計算あり
     $qk = $k->JD2Q($j); $dnum6 = $qk['dnum6']; $mnum6 = intval($qk['qm']) % 6 + 1;
-    $res_str = $res_str . sprintf("旧暦日: %d-%02d-%02d　　月の六曜=%s(%d)　日の六曜=%s(%d)\n", $qk['qy'],$qk['qm'],$qk['qd'],
-            $s6list[$mnum6], $mnum6,  $s6list[$dnum6], $dnum6);
+    $res_str = $res_str . sprintf("旧暦日: %d-%02d-%02d　　日の六曜=%s(%d)\n",
+            $qk['qy'],$qk['qm'],$qk['qd'],
+            $s6list[$dnum6], $dnum6);
 endif;
 
 if (HAVE_ASTRO_SUN): // 太陽 天文計算あり
