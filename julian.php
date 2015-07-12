@@ -12,7 +12,7 @@ class Julian
      * @param  float $jdnum	ユリウス日
      * @return float 	修正ユリウス日
      */
-    function JD2MJD($jdnum)
+    static function JD2MJD($jdnum)
     {
         return ($jdnum - 2400000.5);
     }
@@ -23,7 +23,7 @@ class Julian
      * @param  float $mjdnum	修正ユリウス日
      * @return float 	ユリウス日
      */
-    function MJD2JD($mjdnum)
+    static function MJD2JD($mjdnum)
     {
         return ($mjdnum + 2400000.5);
     }
@@ -34,7 +34,7 @@ class Julian
      * @param  float $jdnum	ユリウス日
      * @return float 	J2000.0日
      */
-    function JD2J2K($jdnum)
+    static function JD2J2K($jdnum)
     {
         return ($jdnum - 2451545.0);
     }
@@ -45,7 +45,7 @@ class Julian
      * @param  float $mjdnum	J2000.0
      * @return float 	ユリウス日
      */
-    function J2K2JD($mjdnum)
+    static function J2K2JD($mjdnum)
     {
         return ($mjdnum + 2451545.0);
     }
@@ -61,7 +61,7 @@ class Julian
      * @param  float $s0	西暦秒
      * @return float 	J2000.0日
      */
-    function G2J2K($y0, $m0, $d0, $h0=0, $min0=0, $s0=0)
+    static function G2J2K($y0, $m0, $d0, $h0=0, $min0=0, $s0=0)
     {
         $x = self::G2JD($y0, $m0, $d0, $h0, $min0, $s0);
         return( self::JD2J2K($x) );
@@ -73,7 +73,7 @@ class Julian
      * @param  float $j 	J2000.0
      * @return array	[int 年, int 月, int 日, 'y'=>年, 'm'=>月, 'd'=>int 日, 'h'=>int 時, 's'=>float 秒]
      */
-    function J2K2G($j)
+    static function J2K2G($j)
     {
         $x = J2K2JD($j);
         return( self::JD2G($x) );
@@ -91,7 +91,7 @@ class Julian
      * @param  float $s0	西暦秒
      * @return float 	ユリウス日
      */
-    function G2JD($y0, $m0, $d0, $h0=0, $min0=0, $s0=0)
+    static function G2JD($y0, $m0, $d0, $h0=0, $min0=0, $s0=0)
     {
         $y = (int)$y0;
         $m = (int)$m0;
@@ -105,13 +105,13 @@ class Julian
         if ($min < -120 || $min > 120) { $errmsg = $errmsg . "  min < 0"; }
         if ($sec < -120 || $sec > 120) { $errmsg = $errmsg . "  sec < 0"; }
         if (strlen($errmsg) > 0) {
-            $errmsg = "ERROR: Julian::G2JD() : " . $errmsg . "\n";
-            exit(1);
+          $errmsg = "ERROR: Julian::G2JD() : " . $errmsg . "\n";
+          exit(1);
         }
 
         $jdInt = gregoriantojd($m, $d, $y); //BOOO!!!
-        $f = $h / 24.0 + $min / (24.0*60.0) + $sec / (24.0*3600.0);
-        $jd = floatVal($jdInt) + $f + 0.5;
+        $f = $h / 24.0 + $min / 1440.0 + $sec / 86400.0;
+        $jd = floatVal($jdInt) - 0.5 + $f;
 
         return($jd);
     }
@@ -127,7 +127,7 @@ class Julian
      * @param  float $s0	西暦秒
      * @return float 	修正ユリウス日
      */
-    function G2MJD($y0, $m0, $d0, $h0=0, $min0=0, $s0=0)
+    static function G2MJD($y0, $m0, $d0, $h0=0, $min0=0, $s0=0)
     {
         $j=self::G2JD($y0, $m0, $d0, $h0, $min0, $s0);
         return ($j - 2400000.5);
@@ -140,7 +140,7 @@ class Julian
      * @param  float $jdnum0	ユリウス日
      * @return array	[int 年, int 月, int 日, 'y'=>年, 'm'=>月, 'd'=>int 日, 'h'=>int 時, 'min'=>int 分, 's'=>float 秒]
      */
-    function JD2G($jdnum0)
+    static function JD2G($jdnum0)
     {
         $jdnum = (float)$jdnum0;
         if ($jdnum <= 0) {
@@ -149,24 +149,26 @@ class Julian
         }
 
         $jdnum = $jdnum +0.5;
-        $jdInt = intVal($jdnum);
-        $gstr = jdtogregorian($jdInt); // month/day/year.
-        $dd = explode('/', $gstr);  // [m,d,y]
+	$jdInt = intVal($jdnum);
+    	$gstr = jdtogregorian($jdInt); // month/day/year
+    	$dd = explode('/', $gstr);  // [m,d,y]
 
-        $f = $jdnum - intVal($jdnum);
+    	$f = $jdnum - intVal($jdnum);
 
-        $x = $f * 24.0;
-        $h = intVal($x);
+    	$x = $f * 24.0;
+    	$h = intVal($x);
 
-        $x = $x - $h;
-        $x = $x * 60.0;
-        $min = intVal($x);
+    	$x = $x - $h;
+    	$x = $x * 60.0;
+    	$min = intVal($x);
 
-        $x = $x - $min;
-        $x = $x * 60.0;
-        $sec = $x;
+    	$x = $x - $min;
+    	$x = $x * 60.0;
+    	$sec = $x;
 
-        return array($dd['2'],$dd['0'],$dd['1'],$h,$min,$sec);
+        return array($dd['2'],$dd['0'],$dd['1'],
+                     'y'=>$dd['2'], 'm'=>$dd['0'], 'd'=>$dd['1'],
+		     'h'=>intval($h), 'min'=>intval($min), 's'=>$sec);
     }
 
     /**
@@ -175,7 +177,7 @@ class Julian
      * @param  float $mjdnum0	修正ユリウス日
      * @return array	[int 年, int 月, int 日, 'y'=>年, 'm'=>月, 'd'=>int 日, 'h'=>int 時, 's'=>float 秒]
      */
-    function MJD2G($mjdnum0)
+    static function MJD2G($mjdnum0)
     {
         $jdnum = (float)$mjdnum0 + 2400000.5;
         return( self::JD2G($jdnum) );

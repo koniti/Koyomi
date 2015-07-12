@@ -326,12 +326,6 @@ endif;
     {
         $jd = (float)$jd0;
 
-if (!HAVE_ASTRO_SUN): // 太陽の天文計算しない場合: 毎月1日を月の切り替えとする
-            $a = Julian::JD2G($jd);
-            $m = $a['m'];
-            return( array($m, 0.0, 'm'=>$m, 'long'=>0.0) );
-endif;
-
         $a = self::JDtoYearStars($jd);
 
         $n9 = $a['ynum9'];
@@ -386,9 +380,16 @@ endif;
         /*
           9星切り替えの概念は、listTurn9()、listTurn9sp() 参照
         */
-        $mjd = Julian::JD2MJD($jd);
-        $mjd = intval($mjd); //単純化
+        $mjd = Julian::JD2MJD($jd); //MJDのほうがやりやすい
+        $mjdint = intval($mjd);
+	$f = $mjd - $mjdint;	//時間部分
+        $mjd = $mjdint; //単純化
 
+	/* 23:00:00 以降は次の日 */
+	$fh = $f * 24.0;
+	if ($fh >= 23) { $mjd = $mjd + 1; }
+
+	/* */
         $p = $mjd + 3980; // magic number = 3980
         $x = $p % 4200;
 
@@ -505,7 +506,7 @@ endif;
      * JD から 月(24節気で切り替えの月)を調べる
      *
      * @param  float $jd0	ユリウス日(Local time)
-     * @return array	[int 月, 'm'=>int 月, 'long'=>float 太陽黄経°]
+     * @return array	[int 月, float 太陽黄経°, 'm'=>int 月, 'long'=>float 太陽黄経°]
     */
     protected function JDto24Mon($jd0)
     {
@@ -514,6 +515,10 @@ endif;
         $g = Julian::JD2G($jd);
         $y = $g['y'];
         $m = $g['m'];
+if (!HAVE_ASTRO_SUN): // 太陽の天文計算しない場合: 毎月1日を月の切り替えとする
+            return array($m, 0.0, 'm'=>$m, 'long'=>0.0);
+endif;
+
         $deg = self::$mlam[ $m ]; //指定された月の、切り替え節気の角度
         if (self::s24jdpool_exists("$y", "$deg") > -9999) { $t = $this->s24jdpool["$y"]["$deg"]; }
         else {
@@ -523,11 +528,11 @@ endif;
             $t = Sun::searchDegDay($deg, $s, $e) + $this->jisa; // local time.
             self::s24jdpool_set("$y", "$deg", $t);
         }
+
         if ($jd < $t) { $m = $m -1; }
         if ($m < 1) { $m = 12; }
         if ($m > 12) { $m = 1; }
         return array($m, 0.0, 'm'=>$m, 'long'=>0.0);
-
     }
 
 
@@ -668,12 +673,6 @@ endif;
         $p = $mjd -220; // magic number  3980 + 220 = 4200  MJD220=1859-06-25 三碧
         $x = $p % 4200;
 
-        //特異点。1日ずらそう。
-/*      if (0 == $x) {
-            $p = $p + 1;
-            $x = $p % 4200;
-        }
-*/
             //前後の切替日をさがせ!
             // 前の特異点MJD
             $prev_sp = intval($p / 4200) * 4200 +220;
@@ -1046,6 +1045,7 @@ endif;
             友引 先負 仏滅 大安 赤口 先勝
         */
         $yo6 = ($qm + $qd + 4) % 6 +1;
+
         return( array('qy'=>$qy,'qm'=>$qm,'qd'=>$qd,'dnum6'=>$yo6) );
     }
 

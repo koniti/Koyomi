@@ -50,7 +50,7 @@ function doCalc($jisa0, $y0,$m0,$d0, $h0=0, $min0=0, $sec0=0)
     $res_str = sprintf("%d-%02d-%02d %02d:%02d:%09.6f\n", $y ,$m ,$d ,$h,$min,$sec);
 
     $k = new Koyomi($jisa);
-    $j = Julian::G2JD($y, $m, $d, $h);
+    $j = Julian::G2JD($y, $m, $d, $h, $min, $sec);
     $a = $k->JDto91012($j);
     $s9listAll = $k->getlist9(); $s9list = $s9listAll['sh'];
     $s10list = $k->getlist10();
