@@ -351,7 +351,7 @@ endif;
         $mod = ($n9 - 1) % 3;
         $mnum9 = $mod * 3 + 10 - $mm;
         while ($mnum9 > 9) { $mnum9 = $mnum9 - 9; }
-        while ($mnum9 < 0) { $mnum9 = $mnum9 + 9; }
+        while ($mnum9 < 1) { $mnum9 = $mnum9 + 9; }
 
         // 月の12支は、そのまま使う。
         $mnum12 = $m;
@@ -932,41 +932,41 @@ endif;
       $n10 = intval($n10) -1;
       $n12 = intval($n12);
       if ($n12<0 || $n12>12) { return '';}
-      if ($n10<0 || $n10>9) { return '';}
+      if ($n10<0 || $n10>10) { return '';}
       if (12 == $n12) { $n12=0; } //子
       $g = intval($n10 / 2);
       return self::$jyu2tenkai[$n12][$g];
     }
 
     //================================================
-    // getter
-    function getlist9() {
+    // static definitions getter
+    static function getlist9() {
         $a = array();
         return( array('full'=>array_merge($a, self::$star9),
                       'sh'=>array_merge($a, self::$star9sh),
                       'vs'=>array_merge($a, self::$star9vs) ) );
     }
-    function getlist10() {
+    static function getlist10() {
         $a = array();
         return( array_merge($a, self::$kan10) );
     }
-    function getlist12() {
+    static function getlist12() {
         $a = array();
         return( array_merge($a, self::$si12) );
     }
-    function getlist6() {
+    static function getlist6() {
         $a = array();
         return( array_merge($a, self::$yo6) );
     }
-    function getlist24deg() {
+    static function getlist24deg() {
         $a = array();
         return( array_merge($a, self::$mlam) );
     }
-    function getlistNatt() {
+    static function getlistNatt() {
         $a = array();
         return( array_merge($a, self::$natt) );
     }
-    function getlist12tenkai() {
+    static function getlist12tenkai() {
         return(self::$jyu2tenkai);
     }
 
