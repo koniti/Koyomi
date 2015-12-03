@@ -144,7 +144,7 @@ class Julian
     {
         $jdnum = (float)$jdnum0;
         if ($jdnum <= 0) {
-            print "ERROR: Julian::JD2G(jdnum) :  jdnum <= 0\n";
+            print "ERROR: Julian::JD2G($jdnum) :  jdnum <= 0\n";
             exit(1);
         }
 

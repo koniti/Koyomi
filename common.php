@@ -10,6 +10,10 @@ define('HAVE_ASTRO_SUN', true);
 //define('HAVE_ASTRO_SUN', false);
 define('HAVE_ASTRO_MOON', true);
 //define('HAVE_ASTRO_MOON', false);
+
+define('HAVE_MEMCACHED', false);
+define('Memcached_server', 'localhost');
+define('Memcached_port', 11211);
 }
 /* HAVE_ASTROCALC について
  * moon.php、sun.phpで、天文計算ルーチンを組み込んだ場合、「true」にする。

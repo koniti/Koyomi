@@ -138,7 +138,9 @@ class Koyomi
 
     // 何度も使うかもしれないので、一度計算した24節気は記憶しておく。
     // [year][deg]=jd
+    protected $mem;
     protected $s24jdpool = array();
+
     protected function s24jdpool_exists($y, $deg) {
         if (array_key_exists("$y", $this->s24jdpool)  &&
             array_key_exists("$deg", $this->s24jdpool["$y"])
@@ -146,14 +148,30 @@ class Koyomi
         {
             return $this->s24jdpool["$y"]["$deg"];
         }
+        if (HAVE_MEMCACHED) {
+          $key = "s24_${y}_${deg}";
+          $data = $this->mem->get($key);
+          if ($this->mem->getResultCode() == Memcached::RES_DATA_EXISTS) {
+            $this->s24jdpool["$y"]["$deg"] = $data;
+            return $data;
+          }
+        }
         return -10000;
     }
+
     protected function s24jdpool_set($y, $deg, $jd=-9999) {
         if (! array_key_exists("$y", $this->s24jdpool) ) {
             $this->s24jdpool["$y"] = array();
         }
         if (! array_key_exists("$deg", $this->s24jdpool["$y"]) ) {
             $this->s24jdpool["$y"]["$deg"] = $jd;
+        }
+        if (HAVE_MEMCACHED) {
+          $key = "s24_${y}_${deg}";
+          $data = $this->mem->get($key);
+          if ($this->mem->getResultCode() == Memcached::RES_NOTFOUND) {
+             $this->mem->set($key, $data);
+          }
         }
     }
 
@@ -163,6 +181,10 @@ class Koyomi
     */
     function __construct($jisa0=0.0) {
         $this->jisa = (float)$jisa0 / 24.0;
+        if (HAVE_MEMCACHED) {
+          $this->mem = new Memcached();
+          $this->mem->addServer(Memcached_server, Memcached_port);
+        }
     }
     function setTimeDiff($jisa0=0.0) {
         $this->jisa = (float)$jisa0 / 24.0;
