@@ -149,11 +149,12 @@ class Koyomi
             return $this->s24jdpool["$y"]["$deg"];
         }
         if (HAVE_MEMCACHED) {
-          $key = "s24_${y}_${deg}";
+          $key = "s24_{$y}_{$deg}";
           $data = $this->mem->get($key);
-          if ($this->mem->getResultCode() == Memcached::RES_DATA_EXISTS) {
-            $this->s24jdpool["$y"]["$deg"] = $data;
-            return $data;
+          $res = $this->mem->getResultCode();
+          if ($res == Memcached::RES_SUCCESS) {
+              $this->s24jdpool["$y"]["$deg"] = $data;
+              return $data;
           }
         }
         return -10000;
@@ -167,10 +168,11 @@ class Koyomi
             $this->s24jdpool["$y"]["$deg"] = $jd;
         }
         if (HAVE_MEMCACHED) {
-          $key = "s24_${y}_${deg}";
-          $data = $this->mem->get($key);
-          if ($this->mem->getResultCode() == Memcached::RES_NOTFOUND) {
-             $this->mem->set($key, $data);
+          $key = "s24_{$y}_{$deg}";
+          $tmp = $this->mem->get($key);
+          $res = $this->mem->getResultCode();
+          if ($res == Memcached::RES_NOTFOUND) {
+            $this->mem->set($key, $jd);
           }
         }
     }
@@ -781,7 +783,7 @@ endif;
             }
             $g = Julian::JD2G($j);
 
-            $ans[] = array('y'=>$g['y'],'m'=>$g['m'],'d'=>$g['d'],'h'=>$g['h'],'min'=>$g['min'],'s'=>$g['s']);
+            $ans[] = array('y'=>$g['y'],'m'=>$g['m'],'d'=>$g['d'],'h'=>$g['h'],'min'=>$g['min'],'s'=>$g['s'], 'deg'=>$deg);
 
         }
         return $ans;
@@ -795,7 +797,6 @@ endif;
      * @param  int $y0	年
      * @return [] 	"角度"=>ユリウス日(Local time) の配列
     */
-    //未使用関数
     function y24sekki($y0)
     {
         $y = (int)$y0;
@@ -1156,6 +1157,15 @@ endif;
     protected function listSaku($year0)
     {
         $y = (int)$year0;
+
+	if (HAVE_MEMCACHED) {
+          $key = "saku_{$y}";
+          $data = $this->mem->get($key);  // saku_2015 12345,12346,12347,....
+          if ($this->mem->getResultCode() == Memcached::RES_SUCCESS) {
+             return explode(",", $data);
+          }
+        }
+
         $a = self::listChuSetu($y);
 
         $sd = array();
@@ -1181,6 +1191,12 @@ endif;
             array_shift($sd);
         }
 
+        if (HAVE_MEMCACHED) {
+           $key = "saku_{$y}";
+           $val = implode(",", $sd);
+           $this->mem->set($key, $val); // saku_2015 12345,12346,12347,....
+        }
+
         return($sd);
     }
 
@@ -1202,13 +1218,29 @@ if (! HAVE_ASTRO_MOON ):
         return NULL;
 endif;
         $y = (int)$year0;
+        $qm1 = array();
+
+	if (HAVE_MEMCACHED) {
+          $key = "q_{$y}";
+          $data = $this->mem->get($key);  // q_2015 2015,1,....@.....@.....
+          $res = $this->mem->getResultCode();
+          if ($res == Memcached::RES_SUCCESS) {
+             $one = explode("@", $data);
+             foreach ($one as $a) {
+               $v = explode(",", $a);
+               if ("{$v[5]}" == "") { $v[5] = NULL; }
+               if ("{$v[6]}" == "") { $v[6] = NULL; }
+               $qm1[] = array('y'=>$v[0], 'leap'=>$v[1], 'm'=>$v[2], 'sakujd'=>$v[3], 'sakug'=>$v[4], 'chujd'=>$v[5], 'chudeg'=>$v[6]);
+             }
+             return($qm1);
+          }
+        }
 
         $chu = self::listChuSetu($y); //西暦で、前年12月,1月,2月...12月,翌年1月 : 合計14個
         $chucnt = count($chu);
         $sd = self::listSaku($y);
         $sdcnt = count($sd);
 
-        $qm1 = array();
         $gd = Julian::JD2G($sd[0]);
         $y = $gd['y'];
         //初期値
@@ -1388,6 +1420,16 @@ endif;
                 $s = sprintf("%04d-%02d-%02d %02d:%02d:%02d", $g['y'], $g['m'], $g['d'], $g['h'], $g['min'], $g['s']);
                 $qm1[$i]['chug'] = $s;
             }
+        }
+
+	if (HAVE_MEMCACHED) {
+          $y = (int)$year0;
+          $key = "q_{$y}"; $v=array();
+          foreach ($qm1 as $d) {
+            $v[] = "{$d['y']},{$d['leap']},{$d['m']},{$d['sakujd']},{$d['sakug']},{$d['chujd']},{$d['chudeg']}";
+          }
+          $val = implode("@", $v);
+          $this->mem->set($key, $val); // q_2015 2015,1,...@....@...
         }
 
         return($qm1);
