@@ -3,6 +3,8 @@
 // PHP標準の、GregorianToJD()、JDToGregorian() 関数、使いにくい
 //   "月/日/年"の順序
 //   Julian day number も、年月日も、整数*のみ*。少数(時間)は無視される
+// -4714/11/25 = Julian Day number is 1
+// GregorianToJD()、JDToGregorian() は、0(-4714/11/24) 以下は扱えない。全て0になる
 //*************************************************
 class Julian
 {
@@ -109,6 +111,7 @@ class Julian
           exit(1);
         }
 
+        if (0 == $y) { $y = -1; }
         $jdInt = gregoriantojd($m, $d, $y); //BOOO!!!
         $f = $h / 24.0 + $min / 1440.0 + $sec / 86400.0;
         $jd = floatVal($jdInt) - 0.5 + $f;
@@ -151,9 +154,13 @@ class Julian
         $jdnum = $jdnum +0.5;
 	$jdInt = intVal($jdnum);
     	$gstr = jdtogregorian($jdInt); // month/day/year
-    	$dd = explode('/', $gstr);  // [m,d,y]
+    	$dx = explode('/', $gstr);  // [m,d,y]
+	$dd = array( intval($dx[0]), intval($dx[1]), intval($dx[2]) );
 
     	$f = $jdnum - intVal($jdnum);
+        if ($f < 0) {
+          $f = 1.0 + $f;
+        }
 
     	$x = $f * 24.0;
     	$h = intVal($x);
@@ -166,8 +173,8 @@ class Julian
     	$x = $x * 60.0;
     	$sec = $x;
 
-        return array($dd['2'],$dd['0'],$dd['1'],
-                     'y'=>$dd['2'], 'm'=>$dd['0'], 'd'=>$dd['1'],
+        return array($dd[2], $dd[0], $dd[1],
+                     'y'=>$dd[2], 'm'=>$dd[0], 'd'=>$dd[1],
 		     'h'=>intval($h), 'min'=>intval($min), 's'=>$sec);
     }
 

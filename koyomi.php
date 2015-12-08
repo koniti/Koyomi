@@ -281,6 +281,7 @@ class Koyomi
     {
         $tbl = array('水', '木', '金', '土', '日', '月', '火');
         $x = $mjd % 7;
+        while ($x<0) { $x = $x + 7; }
         return( $tbl[$x] );
     }
 
@@ -319,7 +320,10 @@ else: //天文計算あり
             $t = Sun::searchDegDay($deg, $s, $e) + $this->jisa;
             self::s24jdpool_set("$y", "$deg", $t);
         }
-        if ($jd < $t) { $y = $y -1; }
+        if ($jd < $t) {
+           $y = $y -1;
+           if (0 == $y) { $y = -1; } //西暦0年は存在しない
+        }
 endif;
         // $a9=array('二', '一', '九', '八', '七', '六', '五', '四', '三');
         $b9  = array( 2,    1,    9,    8,    7,    6,    5,    4,    3);
@@ -410,8 +414,13 @@ endif;
         $mjd = $mjdint; //単純化
 
 	/* 23:00:00 以降は次の日 */
-	$fh = $f * 24.0;
-	if ($fh >= 23) { $mjd = $mjd + 1; }
+        if ($f >= 0) {
+          $fh = $f * 24.0;
+        }
+        else { // mjd < 0 の時
+          $fh = (1.0+$f) * 24.0;
+        }
+        if ($fh >= 23) { $mjd = $mjd + 1; }
 
 	/* */
         $p = $mjd + 3980; // magic number = 3980
@@ -423,7 +432,11 @@ endif;
         else {
             //前後の切替日をさがせ!
             // 前の特異点
-            $prev_sp = intval($p / 4200) * 4200;
+            if ($p >= 0) {
+              $prev_sp = intval($p / 4200) * 4200;
+            } else {
+              $prev_sp = (intval($p / 4200) -1 ) * 4200;
+            }
             // 次の特異点
             $next_sp = $prev_sp + 4200;
 
@@ -433,7 +446,8 @@ endif;
 
             //現時点は、どの区間か？+180日されるところにいるのか？+210か？
             // 直前の切り替え日をさがせ
-            if (3990 <= $x) {
+            $xms = ($x>=0) ? $x : 4200+$x; //mjd<0 の時を考えて
+            if (3990 <= $xms ) {
                 $prev_change = $next_sp - 210;
                 if (3 == $next_sp_num9) { //陽遁
                     $prev_change_num9 = 1; $p_m = 1;
@@ -442,18 +456,19 @@ endif;
                     $prev_change_num9 = 9; $p_m =-1;
                 }
             }
-            elseif ($x < 210) {
+            elseif ($xms < 210) {
                 $prev_change = $prev_sp;
                 $prev_change_num9 = $prev_sp_num9;
                 if (3 == $prev_sp_num9) { $p_m =-1; } else { $p_m = 1; }
             }
             else {
                 // 210 <= $x < 3990 つまり、+180 の区間に居る
-                $y = $x - 30; //最初の区間 210日。180にする
+                $y = $xms - 30; //最初の区間 210日。180にする
                 $prev_change = $prev_sp + 30 + intval($y / 180) * 180;
 
                 // 直前の切替日は何月？ -> 9星がわかる
                 $a = Julian::MJD2G( ($prev_change - 3980) );
+
                 if (1 == $a['m']) { $prev_change_num9 = 1; $p_m = 1; }
                 elseif (10 <= $a['m'] && $a['m'] <= 12) { $prev_change_num9 = 1; $p_m = 1; }
                 elseif ( 5 <= $a['m'] && $a['m'] <=  8) { $prev_change_num9 = 9; $p_m =-1; }
@@ -463,11 +478,13 @@ endif;
             $ddiff = $p - $prev_change;
             if ($p_m > 0) { // 陽遁
                 $dnum9 = ($prev_change_num9 + $ddiff) % 9;
+                while ($dnum9 < 0) { $dnum9 = $dnum9 + 9; }
                 if (0 == $dnum9) { $dnum9 = 9; }
             }
             else { // 陰遁
                 $dnum9 = 9 - $prev_change_num9;
                 $dnum9 = ($dnum9 + $ddiff) % 9;
+                while ($dnum9 < 0) { $dnum9 = $dnum9 + 9; }
                 $dnum9 = 9 - $dnum9;
             }
         }
@@ -699,7 +716,11 @@ endif;
 
             //前後の切替日をさがせ!
             // 前の特異点MJD
-            $prev_sp = intval($p / 4200) * 4200 +220;
+            if ($p >= 0) {
+              $prev_sp = intval($p / 4200) * 4200 +220;
+            } else {
+              $prev_sp = (intval($p / 4200)-1) * 4200 +220;
+            }
             // 次の特異点MJD
             $next_sp = $prev_sp + 4200;
 
@@ -709,7 +730,8 @@ endif;
 
             //現時点は、どの区間か？+180日されるところにいるのか？+210か？
             // 直前の切り替え日をさがせ
-            if (3990 <= $x) {
+            $xms = ($x>=0) ? $x : 4200+$x; //mjd<0 の時を考えて
+            if (3990 <= $xms) {
                 $prev_change = $next_sp - 210;
                 if (3 == $next_sp_num9) { //陽遁
                     $prev_change_num9 = 1; $p_m = 1;
@@ -720,7 +742,7 @@ endif;
                 $next_change = $next_sp;
                 $next_change_num9 = $next_sp_num9;
             }
-            elseif ($x < 210) {
+            elseif ($xms < 210) {
                 $prev_change = $prev_sp;
                 $prev_change_num9 = $prev_sp_num9;
                 if (3 == $prev_sp_num9) { $p_m =-1; } else { $p_m = 1; }
@@ -730,7 +752,7 @@ endif;
             }
             else {
                 // 210 <= $x < 3990 つまり、+180 の区間に居る
-                $y = $x - 30; //最初の区間 210日。180にする
+                $y = $xms - 30; //最初の区間 210日。180にする
                 $prev_change = $prev_sp + 30 + intval($y / 180) * 180;
 
                 // 直前の切替日は何月？ -> 9星がわかる
