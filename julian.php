@@ -119,6 +119,45 @@ class Julian
         return($jd);
     }
 
+    // G2JD1  can calculate before -4714/11/25(=1JD).
+    static function G2JD1($y0, $m0, $d0, $h0=0, $min0=0, $s0=0)
+    {
+        $y = (int)$y0;
+        $m = (int)$m0;
+        $d = (float)$d0;
+        $h = (float)$h0 ; $min = (float)$min0 ; $sec = (float)$s0 ;
+        $errmsg="";
+        if ($m < 1 || $m > 12) { $errmsg = $errmsg . "  month < 1  or  month > 12"; }
+        if ($d < 0 || $d > 32) { $errmsg = $errmsg . "  day < 1  or  day > 31"; }
+        if ($h < -50 || $h > 50) { $errmsg = $errmsg . "  hour < 0"; }
+        if ($min < -120 || $min > 120) { $errmsg = $errmsg . "  min < 0"; }
+        if ($sec < -120 || $sec > 120) { $errmsg = $errmsg . "  sec < 0"; }
+        if (strlen($errmsg) > 0) {
+            $errmsg = "ERROR: Julian::G2JD() : " . $errmsg . "\n";
+            exit(1);
+        }
+
+        /*
+          $y0 < 0 , $y0 > 0   "0 AD." is not exists.
+        */
+        if (0==$y) { $y = -1;}
+
+        /*
+          but in following caluculation, $y assume that "1AD"=1, "1BC"=0, "2BC"=-1
+         */
+        if ($y < 1) { $y = $y + 1; }
+        $a = intval( (14 - $m)/12 );
+        $y = $y + 4800 - $a;
+        $m = $m + 12*$a -3;
+
+        $jdn = $d + intval( (153*$m +2)/5 ) + 365*$y + intval($y/4) - intval($y/100) + intval($y/400) - 32045;
+
+        $f = $h / 24.0 + $min / 1440.0 + $sec / 86400.0;
+        $jd = floatVal($jdn) + $f -0.5;
+
+        return($jd);
+    }
+
     /**
      * Gregorian date -> Modified Julian day number
      *
@@ -176,6 +215,71 @@ class Julian
         return array($dd[2], $dd[0], $dd[1],
                      'y'=>$dd[2], 'm'=>$dd[0], 'd'=>$dd[1],
 		     'h'=>intval($h), 'min'=>intval($min), 's'=>$sec);
+    }
+
+    // JD2G1   can calculate before -4714/11/25(=1JD).
+    static function JD2G1($jdnum0)
+    {
+        $jdnum = (float)$jdnum0;
+        $jdi = intval($jdnum);
+        $jdf = $jdnum - $jdi;
+
+        // HH:MM:SS
+        $f = $jdnum+0.5 -intval($jdnum+0.5);
+        if ($f < 0) {
+          $f = 1.0 + $f;
+        }
+
+        $x = $f * 24.0;
+        $hour = intVal($x);
+
+        $x = $x - $hour;
+        $x = $x * 60.0;
+        $min = intVal($x);
+
+        $x = $x - $min;
+        $x = $x * 60.0;
+        $sec = $x;
+
+        // year,month,day
+        $j = intval($jdnum + 0.5);
+        if ($j >= 0) {
+        } else {
+/*
+        |     day=-1      |  day=0  |
+        +--------+--------+----+----+---
+      -1.5     -1.0     -0.5  0.0  0.5
+float -0.5      0.0     -0.5
++0.5   0.0      0.5      0.0
+         0.0~0.5    -0.4999~-0.00001
+*/
+            $a = $jdf + 0.5;
+            if ($a >= 0.0) { $j = $jdi; }
+            else { $j = $jdi -1; }
+        }
+
+        $cj = 1401;
+        $cp = 1461;
+        $cm = 2;
+        $cn = 12;
+        $cr = 4;
+        $cs = 153;
+        $cu = 5;
+        $cw = 2;
+        $cv = 3;
+        $cy = 4716;
+        $cB = 274277;
+        $cC = -38;
+        $f = $j + $cj + intval( (intval((4*$j + $cB)/146097) * 3) / 4) + $cC;        
+        $e = $cr * $f + $cv;
+        $g = intval( ($e % $cp) / $cr );
+        $h = $cu * $g + $cw;
+        $day = intval( ($h % $cs) / $cu ) + 1;
+        $mon = (intval($h / $cs) + $cm) % $cn + 1;
+        $year = intval($e / $cp) - $cy + intval(($cn + $cm - $mon) / $cn);
+        if ($year <= 0) { $year = $year -1; }
+
+        return array($year, $mon, $day, 'y'=>$year, 'm'=>$mon, 'd'=>$day, 'h'=>intval($hour), 'min'=>intval($min), 's'=>$sec);
     }
 
     /**
