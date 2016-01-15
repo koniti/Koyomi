@@ -93,7 +93,7 @@ class Julian
      * @param  float $s0	西暦秒
      * @return float 	ユリウス日
      */
-    static function G2JD($y0, $m0, $d0, $h0=0, $min0=0, $s0=0)
+    static function G2JD0($y0, $m0, $d0, $h0=0, $min0=0, $s0=0)
     {
         $y = (int)$y0;
         $m = (int)$m0;
@@ -106,6 +106,7 @@ class Julian
         if ($h < -50 || $h > 50) { $errmsg = $errmsg . "  hour < 0"; }
         if ($min < -120 || $min > 120) { $errmsg = $errmsg . "  min < 0"; }
         if ($sec < -120 || $sec > 120) { $errmsg = $errmsg . "  sec < 0"; }
+
         if (strlen($errmsg) > 0) {
           $errmsg = "ERROR: Julian::G2JD() : " . $errmsg . "\n";
           exit(1);
@@ -120,7 +121,7 @@ class Julian
     }
 
     // G2JD1  can calculate before -4714/11/25(=1JD).
-    static function G2JD1($y0, $m0, $d0, $h0=0, $min0=0, $s0=0)
+    static function G2JD($y0, $m0, $d0, $h0=0, $min0=0, $s0=0)
     {
         $y = (int)$y0;
         $m = (int)$m0;
@@ -182,9 +183,10 @@ class Julian
      * @param  float $jdnum0	ユリウス日
      * @return array	[int 年, int 月, int 日, 'y'=>年, 'm'=>月, 'd'=>int 日, 'h'=>int 時, 'min'=>int 分, 's'=>float 秒]
      */
-    static function JD2G($jdnum0)
+    static function JD2G0($jdnum0)
     {
         $jdnum = (float)$jdnum0;
+
         if ($jdnum <= 0) {
             print "ERROR: Julian::JD2G($jdnum) :  jdnum <= 0\n";
             exit(1);
@@ -217,8 +219,8 @@ class Julian
 		     'h'=>intval($h), 'min'=>intval($min), 's'=>$sec);
     }
 
-    // JD2G1   can calculate before -4714/11/25(=1JD).
-    static function JD2G1($jdnum0)
+    //  can calculate before -4714/11/25(=1JD).
+    static function JD2G($jdnum0)
     {
         $jdnum = (float)$jdnum0;
         $jdi = intval($jdnum);
