@@ -297,18 +297,15 @@ class Koyomi
      * @return int	1,2,....9 月の九星
     */
     function whatM9inY9($ys9, $m0) {
-       $s = abs(intVal($ys9));
-       $m = abs(intVal($m0));
-       if ($s < 1 || $s > 9 || $m < 1 || $m > 12) { return NULL; }
-
-       $m = $m + intVal( (13-$m)/12 ) * 12; // 1月を13に。$m = 2,3,4,....13
-       $m = $m -2; // $m=0,1,2,...11
-
-       $a = ($s+1)%3;  //年の一七四→2,九六三→1,八五二→0
-       $a = $a * 3 +2; //一七四の年の2月=八白,九六三の2月=五黄,八五二の2月=二黒
-       $x = $a - $m; //-方向にカウント
-       while ($x < 1) { $x = $x + 9; }
-       return $x;
+        $s = abs(intVal($ys9));
+        $m = abs(intVal($m0));
+        if ($s < 1 || $s > 9 || $m < 1 || $m > 12) { return NULL; }
+        $m = $m + intVal( (13-$m)/12 ) * 12; // 1月を13に。$m = 2,3,4,....13
+        $m = $m -2;     // $m=0,1,2
+        $a = ($s+1)%3;  //年の一七四→2,九六三→1,八五二→0
+        $a = $a*3 +2;   //一七四の年の2月=八白,九六三の2月=五黄,八五二の2月=二黒
+        $x = ($a +18 -$m -1)%9 +1; // +18 =常に+の値にするため
+        return $x;
     }
 
     /**
@@ -344,23 +341,21 @@ class Koyomi
      * @return array[2] 	1,2,....10 年の十干、2個
     */
     function whatY10hasM10($s10, $m0) {
-       $s = abs(intVal($s10));
-       $m = abs(intVal($m0));
-       if ($s < 1 || $s > 10 || $m < 1 || $m > 12) { return NULL; }
+        $s = abs(intVal($s10));
+        $m = abs(intVal($m0));
+        if ($s < 1 || $s > 10 || $m < 1 || $m > 12) { return NULL; }
 
-       $s = $s -1; //0-9で計算(甲=0...壬=9)
-       $m = $m + intVal( (13-$m)/12 )*12 -2; //0-11で計算(2月=0...12月=10,1月=11)
+        $s = $s -1; //0-9で計算(甲=0...壬=9)
 
-       $km = $k % 2;   $mm = $m % 2;
-       if ($km != $mm) { return NULL; } //偶然このような規則で並ぶ
+        $m = $m + intVal( (13-$m)/12 )*12 -2; //0-11で計算(2月=0...12月=10,1月=11)
 
-       $initk = ($m +2) % 10;
-       $need = (0 == $k) ? 10 : $k;
-       $a = ($need - $initk) /2;
-       if (5 == $a) { $a = 0; } //例外($m=8,$k=0の時だけおこる)
-       if ($a < 0) { $a = 5 + $a; }
+        $km = $s % 2;   $mm = $m % 2;
+        if ($km != $mm) { return NULL; } //偶然このような規則で並ぶ
 
-       return array($a+1, $a+6);
+        $initk = ($m +2) % 10;
+        $a = ((10+$s - $initk) /2) %5 +1;
+
+        return array($a, $a+5);
     }
 
 
