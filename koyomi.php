@@ -1066,7 +1066,10 @@ endif;
      * @param  int $n12	十二支(1-12)
      * @return string 	納音名。エラーのとき ''
     */
-    function n1912Tenkai($n10, $n12)
+    function n1912Tenkai($n10, $n12) { //type miss
+       return $this->n1012Tenkai($n10, $n12);
+    }
+    function n1012Tenkai($n10, $n12)
     {
       $n10 = intval($n10) -1;
       $n12 = intval($n12);
