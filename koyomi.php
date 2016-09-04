@@ -922,7 +922,7 @@ endif;
 
     //================================================
     /**
-     * 指定された年の24節気計算
+     * 指定された年の24節気計算。24個全て返す
      *
      * @param  int $y0	年
      * @return [] 	"角度"=>ユリウス日(Local time) の配列
@@ -961,7 +961,6 @@ endif;
      * @param  int $m0	月
      * @return [] 	"角度"=>ユリウス日(Local time) の配列
     */
-    //未使用関数
     function ym24sekki($y0, $m0)
     {
         $y = (int)$y0;
@@ -970,6 +969,49 @@ endif;
         if ($m > 12) {$m=12;}
 
         $a = array();
+
+            $j = self::ym24tuki($y, $m);
+            $deg = self::$mlam[$m];
+            $a["$deg"] = $j;
+
+            $s = Julian::G2JD($y, $m, 1, 0.0) - $this->jisa;
+            $e = $s + 10;
+/*
+            $deg = self::$mlam[$m];
+            if (self::s24jdpool_exists("$y", "$deg") > -9999) {
+                $j = $this->s24jdpool["$y"]["$deg"];
+            } else {
+                $j = Sun::searchDegDay($deg, $s, $e) + $this->jisa;
+                self::s24jdpool_set("$y", "$deg", $j);
+            }
+            $a["$deg"] = $j;
+*/
+            $deg = self::$mchu[$m];
+            if (self::s24jdpool_exists("$y", "$deg") > -9999) {
+                $j = $this->s24jdpool["$y"]["$deg"];
+            } else {
+                $j = Sun::searchDegDay($deg, $s, $e) + $this->jisa;
+                self::s24jdpool_set("$y", "$deg", $j);
+            }
+            $a["$deg"] = $j;
+
+        return $a;
+    }
+
+
+    /**
+     * 指定された年・月にある、月かわりのJD(localtime)を返す
+     *
+     * @param  int $y0	年
+     * @param  int $m0	月
+     * @return float 	ユリウス日(Local time)
+    */
+    function ym24tuki($y0, $m0)
+    {
+        $y = (int)$y0;
+        $m = (int)$m0;
+        if ($m < 1) { $m=1; }
+        if ($m > 12) {$m=12;}
 
             $s = Julian::G2JD($y, $m, 1, 0.0) - $this->jisa;
             $e = $s + 10;
@@ -981,18 +1023,8 @@ endif;
                 $j = Sun::searchDegDay($deg, $s, $e) + $this->jisa;
                 self::s24jdpool_set("$y", "$deg", $j);
             }
-            $a["$deg"] = $j;
 
-            $deg = self::$mchu[$m];
-            if (self::s24jdpool_exists("$y", "$deg") > -9999) {
-                $j = $this->s24jdpool["$y"]["$deg"];
-            } else {
-                $j = Sun::searchDegDay($deg, $s, $e) + $this->jisa;
-                self::s24jdpool_set("$y", "$deg", $j);
-            }
-            $a["$deg"] = $j;
-
-        return $a;
+        return $j;
     }
 
 
