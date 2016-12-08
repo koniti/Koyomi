@@ -136,6 +136,21 @@ class Koyomi
       array('勇猪',	'遊び猪',	'病猪',	'家猪',	'荒猪')
     );
 
+    protected static $sekki = array(
+        "小寒", 	"大寒",
+	"立春",   	"雨水",
+	"啓蟄",   	"春分",
+	"清明",   	"穀雨",
+	"立夏",   	"小満",
+	"芒種",   	"夏至",
+	"小暑",   	"大暑",
+	"立秋",   	"処暑",
+	"白露",   	"秋分",
+	"寒露",   	"霜降",
+	"立冬",   	"小雪",
+	"大雪",   	"冬至",
+    );
+
     // 何度も使うかもしれないので、一度計算した24節気は記憶しておく。
     // [year][deg]=jd
     protected $mem;
@@ -201,6 +216,11 @@ class Koyomi
         return( (float)$jd0 - $this->jisa );
     }
 
+
+
+
+    //================================================
+    /***** 日に関わる計算 ******/
 
     // この手の計算だと、JDに 0.5 がついてまわるので、修正ユリウス日を使うほうが扱いやすい。
     /**
@@ -288,8 +308,11 @@ class Koyomi
 
 
 
+    //================================================
+    /***** 月に関わる計算 ******/
+
     /**
-     * 年の9星 + 月 -> 月の9を求める
+     * 年の9星 + 何月 -> その月の9を求める
      * 簡易計算。年月の切り替わり日時を一切みない。
      *
      * @param  float $ys9	年の9星 1, 2, ....9
@@ -309,7 +332,7 @@ class Koyomi
     }
 
     /**
-     * 年の十干 + 月 -> 月の十干を求める
+     * 年の十干 + 何月 -> その月の十干を求める
      * 簡易計算。年月の切り替わり日時を一切みない。
      *
      * @param  float $ys10	年の十干 1, 2, ....10
@@ -333,7 +356,7 @@ class Koyomi
     }
 
     /** 未使用
-     * 月の十干 + 月 -> 年の十干を2個求める
+     * 月の十干 + 何月 -> 年の十干を2個求める
      * 簡易計算。年月の切り替わり日時を一切みない。
      *
      * @param  float $s10	月の十干 1, 2, ....10
@@ -359,7 +382,34 @@ class Koyomi
     }
 
 
+    /**
+     * 西暦年、月 -> その月の9,10,12を出す
+     * 簡易計算。年月の切り替わり日時を一切みない。
+     *
+     * @param  float $y0	西暦(Local time) ... -2, -1, 1, 2, .... 0は存在しない
+     * @param  float $m0	月 1, 2, ....12
+     * @return array	[ 'mnum9'=>int 月9星, 'mnum10'=>int 月十干, 'nnum12'=>int 月十二支 ]
+     */
+    function YMtoMonStars($y0, $m0)
+    {
+        $y = (float)$y0;
+        $m = intVal($m0);
+        if ($m < 1) { $m=1; }
+        if ($m > 12) { $m=12; }
+        if (1 == $m) { $y = $y -1; }
 
+        $a = $this->YtoYearStars( $y );
+        $m9 = $this->whatM9inY9($a['ynum9'], $m0);
+        $m10 = $this->whatM10inY10($a['ynum10'], $m0);
+
+        return( array('mnum9'=>$m9, 'mnum10'=>$m10, 'mnum12'=>$m) );
+    }
+
+
+
+
+    //================================================
+    /***** 年に関わる計算 ******/
 
     /**
      * 西暦年 -> 年の9,10,12を求める
@@ -392,8 +442,30 @@ class Koyomi
         return(array('ynum9'=>$n9,    'ynum10'=>$n10,    'ynum12'=>$n12));
     }
 
+    /**
+     * 西暦年, 何月 -> 年の9,10,12を求める
+     * 簡易計算。年の切り替わり日時を一切みない。
+     *
+     * @param  float $y0	西暦(Local time) ... -2, -1, 1, 2, .... 0は存在しない
+     * @param  float $m0	月 1, 2, ....12
+     * @return array	[ 'ynum9'=>int 年9星, 'ynum10'=>int 年十干, 'ynum12'=>int 年十二支 ]
+    */
+    function YMtoYearStars($y0, $m0)
+    {
+        $m = (int)$m0;
+        $y = (float)$y0;
+        if ($m < 1) { $m = 1; }
+        if ($m > 12) { $m = 12; }
+        if (1 == $m) { $y = $y -1; }
+
+        return( $this->YtoYearStars($y) );
+    }
 
 
+
+
+    //================================================
+    /***** JDからの変換 ******/
 
     /**
      * Julian day number -> 年の9,10,12を求める
@@ -975,7 +1047,7 @@ endif;
             $a["$deg"] = $j;
 
             $s = Julian::G2JD($y, $m, 1, 0.0) - $this->jisa;
-            $e = $s + 10;
+            $e = $s + 30;
 /*
             $deg = self::$mlam[$m];
             if (self::s24jdpool_exists("$y", "$deg") > -9999) {
@@ -1027,6 +1099,19 @@ endif;
         return $j;
     }
 
+    //二十四節気名を返す
+    static function getlist24name() {
+        $a = array();
+        return( array_merge($a, self::$sekki) );
+    }
+
+    /**
+     * 角度->24節気名
+     */
+    function deg24name($deg) {
+        $idx = intVal( fn_nm(intVal($deg) -285) / 15 );
+        return self::$sekki[$idx];
+    }
 
 
 
@@ -1143,6 +1228,9 @@ endif;
     static function getlist12tenkai() {
         return(self::$jyu2tenkai);
     }
+
+
+
 
     //================================================
     // 旧暦の計算。複雑
